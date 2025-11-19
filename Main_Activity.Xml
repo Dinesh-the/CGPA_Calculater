@@ -1,0 +1,66 @@
+package com.example.ca1   
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import com.example.ca1.R
+
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+class activity_main : AppCompatActivity() {
+
+    private lateinit var etIssueDate: EditText
+    private lateinit var etReturnDate: EditText
+    private lateinit var btnCalculateFine: Button
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        etIssueDate = findViewById(R.id.et3)
+        etReturnDate = findViewById(R.id.et4)
+        btnCalculateFine = findViewById(R.id.bn1)
+
+        btnCalculateFine.setOnClickListener {
+            checkFine()
+        }
+    }
+
+    private fun checkFine() {
+        val issueStr = etIssueDate.text.toString().trim()
+        val returnStr = etReturnDate.text.toString().trim()
+
+        if (issueStr.isEmpty() || returnStr.isEmpty()) {
+            Toast.makeText(this, "Please enter both dates", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        sdf.isLenient = false
+
+        try {
+            val issueDate = sdf.parse(issueStr)
+            val returnDate = sdf.parse(returnStr)
+
+            if (issueDate == null || returnDate == null) {
+                Toast.makeText(this, "Invalid date format", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val diffInMillis = returnDate.time - issueDate.time
+            val diffInDays = diffInMillis / (1000 * 60 * 60 * 24)
+
+            when {
+                diffInDays < 0 -> Toast.makeText(this, "Return date cannot be before issue date", Toast.LENGTH_LONG).show()
+                diffInDays > 10 -> Toast.makeText(this, "There will be a fine", Toast.LENGTH_LONG).show()
+                else -> Toast.makeText(this, "No fine", Toast.LENGTH_LONG).show()
+            }
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Enter date as dd/MM/yyyy", Toast.LENGTH_LONG).show()
+        }
+    }
+}
